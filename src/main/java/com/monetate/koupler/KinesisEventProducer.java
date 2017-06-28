@@ -5,10 +5,15 @@ import java.nio.ByteBuffer;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.time.Instant; //Added to file
+import java.nio.charset.StandardCharsets; //Added to file
+import java.util.UUID; //Added to file
+import java.util.Arrays;
 
 import com.monetate.koupler.format.Format;
 import com.monetate.koupler.format.FormatFactory;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.codec.binary.Base64; //Added to file
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,11 +125,14 @@ public class KinesisEventProducer implements Runnable {
     }
 
     public void send(String event) throws UnsupportedEncodingException {
-        byte[] bytes = event.getBytes("UTF-8");
+        byte[] bytes = Base64.decodeBase64(event.getBytes("UTF-8"));
         this.metrics.queueEvent(bytes.length);
+
         ByteBuffer data = ByteBuffer.wrap(bytes);
-        String partitionKey = getPartitionKey(event);
-        if (partitionKey != null) {
+
+	String partitionKey = UUID.randomUUID().toString(); 
+
+	if (partitionKey != null) {
             ListenableFuture<UserRecordResult> f = producer.addUserRecord(streamName, partitionKey, data);
             Futures.addCallback(f, new FutureCallback<UserRecordResult>() {
                 @Override

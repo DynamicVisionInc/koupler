@@ -4,9 +4,12 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Base64;
+
 
 /**
  * UDP Listener
@@ -33,7 +36,11 @@ public class UdpKoupler extends Koupler implements Runnable {
                 PACKETS.getAndIncrement();
                 byte[] received = new byte[packet.getLength()];
                 System.arraycopy(buf, 0, received, 0, packet.getLength());
-                String event = new String(buf, 0, packet.getLength()).trim();
+
+		String event = Base64.getEncoder().encodeToString(received);
+		// String event = new String(buf, 0, packet.getLength()).trim();
+
+
                 LOGGER.debug("Queueing event [{}]", event);
                 producer.queueEvent(event);
             }
