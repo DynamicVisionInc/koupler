@@ -1,5 +1,6 @@
 package com.monetate.koupler;
 
+import java.net.InetAddress;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -9,7 +10,6 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Base64;
-
 
 /**
  * UDP Listener
@@ -33,20 +33,26 @@ public class UdpKoupler extends Koupler implements Runnable {
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buf, BUF_SIZE);
                 socket.receive(packet);
+
+                InetAddress IPAddress = packet.getAddress();
+                LOGGER.info("ip address [{}]", IPAddress);
+
+                int myPort = packet.getPort();
+                LOGGER.info("Port number [{}]", myPort);
+
                 PACKETS.getAndIncrement();
                 byte[] received = new byte[packet.getLength()];
                 System.arraycopy(buf, 0, received, 0, packet.getLength());
 
-		String event = Base64.getEncoder().encodeToString(received);
-		// String event = new String(buf, 0, packet.getLength()).trim();
-
+                String event = Base64.getEncoder().encodeToString(received);
+                // String event = new String(buf, 0, packet.getLength()).trim();
 
                 LOGGER.debug("Queueing event [{}]", event);
                 producer.queueEvent(event);
             }
         } catch (Exception e){
             LOGGER.error("Problem with socket.", e);
-            
+
         } finally {
             socket.close();
         }
