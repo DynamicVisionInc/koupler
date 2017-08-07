@@ -58,6 +58,9 @@ dependencies {
     compile group: 'org.eclipse.jetty', name: 'jetty-io', version:'9.0.2.v20130417'
     compile group: 'org.eclipse.jetty', name: 'jetty-http', version:'9.0.2.v20130417'
     compile group: 'com.jayway.jsonpath', name: 'json-path', version:'2.2.0'
+
+    compile group: 'org.apache.mina', name: 'mina-core', version:'2.0.16'
+    compile group: 'javax.mail', name: 'mail', version:'1.5.0-b01'
 }
 
 task copyRuntimeLibs(dependsOn: 'build', type: Copy) {
@@ -92,4 +95,3 @@ task dist (dependsOn: 'zipDistribution', type: Copy){
 clean{
     delete "target"
 }
-

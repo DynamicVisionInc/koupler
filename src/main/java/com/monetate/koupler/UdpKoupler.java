@@ -11,6 +11,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Base64;
 
+// added from GTC listeners
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.core.session.DummySession;
+
+import com.gtc.gtclisteners.common.Utilities;
+
+// all units
+import com.gtc.gtclisteners.receivers.ReceiverWorkerContainer;
+
+// calamp specific
+import com.gtc.gtclisteners.receivers.calamp.calamp32.CalampGeofenceFlag;
+import com.gtc.gtclisteners.receivers.calamp.calamp32.Calamp32ReceiverWorker;
+import com.gtc.gtclisteners.receivers.ReceiverWorkerContainer;
+
+// geometris specific
+import com.gtc.gtclisteners.receivers.geometris.GeometrisReceiverWorker;
+
+import java.io.InputStream;
+import java.util.Properties;
+import java.io.FileInputStream;
+
+
 /**
  * UDP Listener
  */
@@ -31,6 +53,15 @@ public class UdpKoupler extends Koupler implements Runnable {
     public void run() {
         try {
             while (true) {
+
+              Properties props = new Properties();
+              String propertiesFile = "./conf/kpl.properties";
+              InputStream input = new FileInputStream(propertiesFile);
+              props.load(input);
+              String manufacturer = props.getProperty("Manufacturer");
+
+              LOGGER.info("Launching " + manufacturer + " Listener");
+
                 DatagramPacket packet = new DatagramPacket(buf, BUF_SIZE);
                 socket.receive(packet);
 
@@ -44,8 +75,38 @@ public class UdpKoupler extends Koupler implements Runnable {
                 byte[] received = new byte[packet.getLength()];
                 System.arraycopy(buf, 0, received, 0, packet.getLength());
 
-                String event = Base64.getEncoder().encodeToString(received);
-                // String event = new String(buf, 0, packet.getLength()).trim();
+                if (manufacturer.equals("Calamp")) {
+
+                  // Instantiate the Calamp Receiver
+                  DummySession session = new DummySession();
+              		ReceiverWorkerContainer container = new ReceiverWorkerContainer();
+                  CalampGeofenceFlag geofenceFlag = new CalampGeofenceFlag();
+                  boolean garminEnabled = false;
+
+                  Calamp32ReceiverWorker crw = new Calamp32ReceiverWorker(received, session, container, geofenceFlag, garminEnabled, socket);
+
+                  crw.run();
+
+                } else if (manufacturer.equals("Geometris")) {
+                  // Instantiate the Geometris Receiver
+                  DummySession session = new DummySession();
+              		ReceiverWorkerContainer container = new ReceiverWorkerContainer();
+
+                  String received_string = new String(buf, 0, packet.getLength()).trim();
+
+                  GeometrisReceiverWorker grw = new GeometrisReceiverWorker(received_string, session, container, socket);
+
+                  grw.run();
+
+                }
+
+                String event_hex_string = Utilities.toHexString(received);
+
+                String event = Base64.getEncoder().encodeToString(event_hex_string.getBytes());
+                //String event = Base64.getEncoder().encodeToString(received);
+                //String event = new String(buf, 0, packet.getLength()).trim();
+
+                LOGGER.info("Raw event: " + event);
 
                 LOGGER.debug("Queueing event [{}]", event);
                 producer.queueEvent(event);
