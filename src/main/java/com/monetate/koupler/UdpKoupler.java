@@ -100,9 +100,7 @@ public class UdpKoupler extends Koupler implements Runnable {
 
                 }
 
-                String event_hex_string = Utilities.toHexString(received);
-
-                String event = Base64.getEncoder().encodeToString(event_hex_string.getBytes());
+                String event = Base64.getEncoder().encodeToString(received);
                 //String event = Base64.getEncoder().encodeToString(received);
                 //String event = new String(buf, 0, packet.getLength()).trim();
 
