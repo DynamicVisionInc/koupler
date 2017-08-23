@@ -1,6 +1,7 @@
 package com.gtc.gtclisteners.receivers.calamp.calamp32;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +10,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 //import org.apache.commons.lang.StringUtils;
 import org.apache.mina.core.buffer.IoBuffer;
@@ -23,12 +25,15 @@ import com.gtc.gtclisteners.common.Utilities.BinaryMessageType;
 //import com.gtc.gtclisteners.common.garmin.GarminUtilities;
 import com.gtc.gtclisteners.receivers.ReceiverWorkerContainer;
 import com.gtc.gtclisteners.receivers.calamp.CalampBaseWorker;
-
+import com.gtc.gtclisteners.data.PulsekitData;
+import com.gtc.gtclisteners.data.Outbound;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.amazonaws.services.dynamodbv2.document.GetItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.ItemCollection;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.regions.Regions;
 
@@ -113,22 +118,13 @@ public class Calamp32ReceiverWorker extends CalampBaseWorker implements Runnable
 		// -the geofence flag is not set OR the geofence flag is set and the message is a geofence response (0x74).
 		// The last condition prevents the Receiver from starting a new geofence transaction while one is
 		// currently ongoing.  Geofence responses are allowed so that the current transaction can continue.
-
-		String mobileId = String.valueOf(Long.parseLong(uid, 16));
 		
-		AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
-		.withRegion(Regions.US_EAST_1)
-		.build();
+		String mobileId = String.valueOf(Long.parseLong(uid, 16));
 
-		DynamoDB docClient = new DynamoDB(client);
-
-		Table table = docClient.getTable("pulsekit-api-austin-dev-outbound");
-
-		Item item = table.getItem("Id", "a2e7d3e7-51f8-44d3-a691-585e6c675c62");
-
-		//GetItemOutcome outcome = table.getItemOutcome("Id", "a2e7d3e7-51f8-44d3-a691-585e6c675c62");
-		System.out.println("OTA Message: \n" + item.toJSONPretty());
-
+		PulsekitData data = new PulsekitData();
+		ArrayList<Outbound> messages = data.getOutboundMessages(mobileId);
+		
+		logger.info("Messages: " + messages);
 /*
 		boolean gefenceValid = !geofenceFlag.getFlag() ||
 				(geofenceFlag.getFlag() && rawMessage.length >= 58 && rawMessage[50] == 0x74);
