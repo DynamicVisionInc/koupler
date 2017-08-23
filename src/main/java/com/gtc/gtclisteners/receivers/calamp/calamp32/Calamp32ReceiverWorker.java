@@ -103,7 +103,7 @@ public class Calamp32ReceiverWorker extends CalampBaseWorker implements Runnable
 	 */
 	@Override
 	protected boolean sendOTA(String uid) {
-
+		
 		boolean sendSuccess = true;
 
 		// Only send the OTA if:
@@ -114,6 +114,8 @@ public class Calamp32ReceiverWorker extends CalampBaseWorker implements Runnable
 		// The last condition prevents the Receiver from starting a new geofence transaction while one is
 		// currently ongoing.  Geofence responses are allowed so that the current transaction can continue.
 
+		String mobileId = String.valueOf(Long.parseLong(uid, 16));
+		
 		AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
 		.withRegion(Regions.US_EAST_1)
 		.build();
@@ -125,8 +127,7 @@ public class Calamp32ReceiverWorker extends CalampBaseWorker implements Runnable
 		Item item = table.getItem("Id", "a2e7d3e7-51f8-44d3-a691-585e6c675c62");
 
 		//GetItemOutcome outcome = table.getItemOutcome("Id", "a2e7d3e7-51f8-44d3-a691-585e6c675c62");
-
-		System.out.println(item.toJSONPretty());
+		System.out.println("OTA Message: \n" + item.toJSONPretty());
 
 /*
 		boolean gefenceValid = !geofenceFlag.getFlag() ||

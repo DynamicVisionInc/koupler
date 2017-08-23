@@ -275,8 +275,10 @@ public abstract class CalampBaseWorker extends ReceiverWorker {
 					uid = Utilities.toHexString(esnBytes);
 					Thread.currentThread().setName(uid +"-"+count);
 					success = true;
+					
 				}
-				logger.info("ESN/UID="+ uid);
+				logger.info("ESN/UID=" + uid);
+				logger.info("MobileId=" + Long.parseLong(uid, 16));
 			}
 			catch(Exception e) {
 				success=false;
