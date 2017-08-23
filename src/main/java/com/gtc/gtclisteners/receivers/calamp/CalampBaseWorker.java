@@ -184,7 +184,7 @@ public abstract class CalampBaseWorker extends ReceiverWorker {
 				}
 
 				if(!isDuplicate) {
-					//sendOTA(uid);
+					sendOTA(uid);
 				}
 			} // tf2
 			else {

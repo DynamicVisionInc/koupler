@@ -24,6 +24,14 @@ import com.gtc.gtclisteners.common.Utilities.BinaryMessageType;
 import com.gtc.gtclisteners.receivers.ReceiverWorkerContainer;
 import com.gtc.gtclisteners.receivers.calamp.CalampBaseWorker;
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.GetItemOutcome;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.regions.Regions;
+
 import java.net.InetAddress;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -105,6 +113,21 @@ public class Calamp32ReceiverWorker extends CalampBaseWorker implements Runnable
 		// -the geofence flag is not set OR the geofence flag is set and the message is a geofence response (0x74).
 		// The last condition prevents the Receiver from starting a new geofence transaction while one is
 		// currently ongoing.  Geofence responses are allowed so that the current transaction can continue.
+
+		AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
+		.withRegion(Regions.US_EAST_1)
+		.build();
+
+		DynamoDB docClient = new DynamoDB(client);
+
+		Table table = docClient.getTable("pulsekit-api-austin-dev-outbound");
+
+		Item item = table.getItem("Id", "a2e7d3e7-51f8-44d3-a691-585e6c675c62");
+
+		//GetItemOutcome outcome = table.getItemOutcome("Id", "a2e7d3e7-51f8-44d3-a691-585e6c675c62");
+
+		System.out.println(item.toJSONPretty());
+
 /*
 		boolean gefenceValid = !geofenceFlag.getFlag() ||
 				(geofenceFlag.getFlag() && rawMessage.length >= 58 && rawMessage[50] == 0x74);
