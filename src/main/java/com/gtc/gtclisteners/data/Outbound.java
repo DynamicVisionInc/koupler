@@ -42,6 +42,6 @@ public class Outbound {
 	
     @Override
     public String toString() {
-		return mobileId + " - " + data;
+		return id + " - " + data;
 	}
 }

@@ -26,21 +26,21 @@ public class PulsekitData {
 
 	
 	public ArrayList<Outbound> getOutboundMessages(String mobileId) {
-		logger.info("preparing to query for " + mobileId);
+		logger.info("Querying outbound messages for " + mobileId);
 		ArrayList<Outbound> messages = new ArrayList<Outbound>();
 
 		Table table = getOTATable();
 		
 		ItemCollection<QueryOutcome> result = table.getIndex(Outbound.MOBILE_ID_INDEX).query(Outbound.MOBILE_ID, mobileId);
 		for(Item item:result) {
-			logger.info("Outbound Message: \n" + item.toJSONPretty());
 			messages.add(new Outbound(item));
 		}
-
+		logger.info(messages.size() + " outbound messages found for " + mobileId);
 		return messages;
 	} 
 
 	public DeleteItemOutcome deleteOutboundItem(Outbound item) {
+		logger.info("Deleting outbound message " + item.toString());
 		return getOTATable().deleteItem(Outbound.ID, item.getId());
 	}
 
