@@ -496,11 +496,14 @@ public class Utilities {
 		ErrorReporter reporter = ErrorReporter.ERROR_REPORTER;
 		ErrorReport report = new ErrorReport(exception, message);
 		reporter.reportError(report);
-
-		printStackTrace(exception.getStackTrace());
-		return exception.getMessage();
 */
-		return "temp";
+		printStackTrace(exception.getStackTrace());
+		String errorMessage = exception.toString();
+
+		if(message != null && errorMessage != "") {
+			errorMessage = message + " - " + errorMessage;
+		}
+		return errorMessage;
 	}
 
 
