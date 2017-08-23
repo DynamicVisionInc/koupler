@@ -24,13 +24,12 @@ import com.gtc.gtclisteners.receivers.ReceiverWorkerContainer;
 import com.gtc.gtclisteners.receivers.calamp.calamp32.CalampGeofenceFlag;
 import com.gtc.gtclisteners.receivers.calamp.calamp32.Calamp32ReceiverWorker;
 import com.gtc.gtclisteners.receivers.ReceiverWorkerContainer;
+import com.gtc.gtclisteners.common.Utilities;
 
 // geometris specific
 import com.gtc.gtclisteners.receivers.geometris.GeometrisReceiverWorker;
 
-import java.io.InputStream;
 import java.util.Properties;
-import java.io.FileInputStream;
 
 
 /**
@@ -54,10 +53,7 @@ public class UdpKoupler extends Koupler implements Runnable {
         try {
             while (true) {
 
-              Properties props = new Properties();
-              String propertiesFile = "./conf/kpl.properties";
-              InputStream input = new FileInputStream(propertiesFile);
-              props.load(input);
+              Properties props = Utilities.loadProperties();
               String manufacturer = props.getProperty("Manufacturer");
 
               LOGGER.info("Launching " + manufacturer + " Listener");

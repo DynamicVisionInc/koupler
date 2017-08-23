@@ -50,6 +50,9 @@ import com.gtc.gtclisteners.Config.ConfigBooleanProperty;
 //import com.gtc.gtclisteners.common.errorreporting.ErrorReporter;
 //import com.gtc.gtclisteners.common.stats.StatsReporter;
 
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 /**
  * This class contains general purpose methods that are used throughout the system.
  * All methods are static.
@@ -504,6 +507,20 @@ public class Utilities {
 			errorMessage = message + " - " + errorMessage;
 		}
 		return errorMessage;
+	}
+
+	public static Properties loadProperties() {
+		Properties props = new Properties();
+		String propertiesFile = "./conf/kpl.properties";
+		try {
+			InputStream input = new FileInputStream(propertiesFile);
+			props.load(input);
+		} catch(FileNotFoundException e) {
+			Utilities.errorHandle(e);
+		} catch(IOException e) {
+			Utilities.errorHandle(e);
+		}
+		return props;
 	}
 
 
