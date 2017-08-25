@@ -517,8 +517,9 @@ public class Calamp32ReceiverWorker extends CalampBaseWorker implements Runnable
 			session.write(buffer);
 			buffer.free();
 			buffer = null;
-			InetAddress address = InetAddress.getByName("127.0.0.1");
-			DatagramPacket packet = new DatagramPacket(out, out.length, address, 4241);
+			//InetAddress address = InetAddress.getByName("127.0.0.1");
+			//DatagramPacket packet = new DatagramPacket(out, out.length, address, 4241);
+			DatagramPacket packet = new DatagramPacket(out, out.length, outboundIp, outboundPort);
 			socket.send(packet);
 			logger.info("Calamp32ReceiverWorker.sendBytes packet sent");
 			return true;
