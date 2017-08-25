@@ -75,7 +75,8 @@ public class Calamp32ReceiverWorker extends CalampBaseWorker implements Runnable
 	 *  		process of a geofence OTA.
 	 */
 	public Calamp32ReceiverWorker(byte[] message, IoSession session,
-			ReceiverWorkerContainer container, CalampGeofenceFlag geofenceFlag, boolean garminEnabled, DatagramSocket socket) {
+			ReceiverWorkerContainer container, CalampGeofenceFlag geofenceFlag, boolean garminEnabled, DatagramSocket socket,
+			InetAddress outboundIp, int outboundPort) {
 		super(container, garminEnabled);
 
 		Thread.currentThread().setName("");
@@ -83,6 +84,9 @@ public class Calamp32ReceiverWorker extends CalampBaseWorker implements Runnable
 		this.session = session;
 		this.geofenceFlag = geofenceFlag;
 		this.socket = socket;
+
+		this.outboundIp = outboundIp;
+		this.outboundPort = outboundPort;
 	} //Calamp32ReceiverWorker
 
 	/**

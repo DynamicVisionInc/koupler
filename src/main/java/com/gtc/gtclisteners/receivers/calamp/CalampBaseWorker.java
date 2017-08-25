@@ -81,6 +81,9 @@ public abstract class CalampBaseWorker extends ReceiverWorker {
 	 */
 	private boolean garminEnabled;
 
+	protected InetAddress outboundIp;
+	protected int outboundPort;
+
 	/**
 	 * Determines if the current raw message is a Garmin message.  If the messages is from a Garmin,
 	 * the appropriate ACK or messaging is performed.
@@ -235,14 +238,14 @@ public abstract class CalampBaseWorker extends ReceiverWorker {
 			buffer.flip();
 			//session.write(buffer);
 
-			InetAddress address = InetAddress.getByName("127.0.0.1");
-			DatagramPacket packet = new DatagramPacket(out, out.length, address, 4241);
+			//InetAddress address = InetAddress.getByName("127.0.0.1");
+			DatagramPacket packet = new DatagramPacket(out, out.length, outboundIp, outboundPort);
 			socket.send(packet);
 
 			buffer.free();
 			buffer = null;
 			out = null;
-			logger.info("ack done");
+			logger.info("ack done, sent to " + outboundIp + ":" + outboundPort);
 		}
 		catch(Exception e) {
 			//logger.error("CalampBaseWorker.ack: " + Utilities.errorHandle(e) );
@@ -275,7 +278,7 @@ public abstract class CalampBaseWorker extends ReceiverWorker {
 					uid = Utilities.toHexString(esnBytes);
 					Thread.currentThread().setName(uid +"-"+count);
 					success = true;
-					
+
 				}
 				logger.info("ESN/UID=" + uid);
 				logger.info("MobileId=" + Long.parseLong(uid, 16));

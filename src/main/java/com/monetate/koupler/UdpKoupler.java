@@ -57,6 +57,7 @@ public class UdpKoupler extends Koupler implements Runnable {
               String manufacturer = props.getProperty("Manufacturer");
 
               LOGGER.info("Launching " + manufacturer + " Listener");
+              LOGGER.info("-------------------------------------------------------------------------------------------------------------------------------");
 
                 DatagramPacket packet = new DatagramPacket(buf, BUF_SIZE);
                 socket.receive(packet);
@@ -79,7 +80,7 @@ public class UdpKoupler extends Koupler implements Runnable {
                   CalampGeofenceFlag geofenceFlag = new CalampGeofenceFlag();
                   boolean garminEnabled = false;
 
-                  Calamp32ReceiverWorker crw = new Calamp32ReceiverWorker(received, session, container, geofenceFlag, garminEnabled, socket);
+                  Calamp32ReceiverWorker crw = new Calamp32ReceiverWorker(received, session, container, geofenceFlag, garminEnabled, socket, IPAddress, myPort);
 
                   crw.run();
 
