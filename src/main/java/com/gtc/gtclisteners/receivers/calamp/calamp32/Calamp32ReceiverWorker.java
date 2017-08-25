@@ -108,7 +108,7 @@ public class Calamp32ReceiverWorker extends CalampBaseWorker implements Runnable
 	 */
 	@Override
 	protected boolean sendOTA(String uid) {
-		
+
 		boolean sendSuccess = true;
 
 		// Only send the OTA if:
@@ -118,13 +118,24 @@ public class Calamp32ReceiverWorker extends CalampBaseWorker implements Runnable
 		// -the geofence flag is not set OR the geofence flag is set and the message is a geofence response (0x74).
 		// The last condition prevents the Receiver from starting a new geofence transaction while one is
 		// currently ongoing.  Geofence responses are allowed so that the current transaction can continue.
-		
+
 		String mobileId = String.valueOf(Long.parseLong(uid, 16));
 
 		PulsekitData data = new PulsekitData();
 		ArrayList<Outbound> messages = data.getOutboundMessages(mobileId);
-		
-		logger.info("Messages: " + messages);
+
+		if(!messages.isEmpty()) {
+			for(Outbound message: messages) {
+				System.out.println(message);
+				String msg = message.getData();
+				byte [] m = msg.getBytes();
+				boolean sent = sendBytes(m);
+				if(sent){
+					data.deleteOutboundItem(message);
+				}
+			}
+		}
+
 /*
 		boolean gefenceValid = !geofenceFlag.getFlag() ||
 				(geofenceFlag.getFlag() && rawMessage.length >= 58 && rawMessage[50] == 0x74);
@@ -140,19 +151,21 @@ public class Calamp32ReceiverWorker extends CalampBaseWorker implements Runnable
 			// obtain the row IDs used to construct that message.  Update the OTA table to indicate that
 			// the message was successfully delivered.  Also, cancel the OTA timer - the flag will be set
 			// to false if there are no more messages to send.
+
 			if(rawMessage.length >= 58 && rawMessage[50] == 0x74) {
-				messageId = ((rawMessage[57] & 0xFF) << 8) + (rawMessage[58] & 0xFF) + 1;
+				// messageId = ((rawMessage[57] & 0xFF) << 8) + (rawMessage[58] & 0xFF) + 1;
 				// Ensure that the message is not a response to a 'complete'.
 				if(rawMessage[53] != 0x03) {
-					otaRowIds = (List<String>) memcachedManager.get(cachekey);
-					memcachedManager.delete(cachekey);
-					String sqlUpdate = "UPDATE " + databaseName + ".OTA SET sent='1' WHERE id IN ("+ StringUtils.join(otaRowIds, ",") +") ";
-					logger.debug(sqlUpdate);
-					MysqlQuery.update(mysqlConnection, sqlUpdate, false);
-					otaRowIds.clear();
+					//
+					// otaRowIds = (List<String>) memcachedManager.get(cachekey);
+					// memcachedManager.delete(cachekey);
+					// String sqlUpdate = "UPDATE " + databaseName + ".OTA SET sent='1' WHERE id IN ("+ StringUtils.join(otaRowIds, ",") +") ";
+					// logger.debug(sqlUpdate);
+					// MysqlQuery.update(mysqlConnection, sqlUpdate, false);
+					// otaRowIds.clear();
 				}
 			}
-
+/*
 			// These maps are hold the create and delete requests.
 			Map<String, String[]> createMessages = new HashMap<String, String[]>();
 			Map<String, String[]> deleteMessages = new HashMap<String, String[]>();
@@ -492,7 +505,7 @@ public class Calamp32ReceiverWorker extends CalampBaseWorker implements Runnable
 	 *
 	 * @param out - bytes to send
 	 */
-	private void sendBytes(byte[] out){
+	public boolean sendBytes(byte[] out){
 		try{
 			IoBuffer buffer = IoBuffer.allocate(out.length);
 			buffer.put(out);
@@ -500,8 +513,14 @@ public class Calamp32ReceiverWorker extends CalampBaseWorker implements Runnable
 			session.write(buffer);
 			buffer.free();
 			buffer = null;
+			InetAddress address = InetAddress.getByName("127.0.0.1");
+			DatagramPacket packet = new DatagramPacket(out, out.length, address, 4241);
+			socket.send(packet);
+			logger.info("Calamp32ReceiverWorker.sendBytes packet sent");
+			return true;
 		}catch(Exception ioe){
 			logger.error("Calamp32ReceiverWorker.sendBytes: "+ Utilities.errorHandle(ioe));
+			return false;
 		}
 	}//sendBytes
 
